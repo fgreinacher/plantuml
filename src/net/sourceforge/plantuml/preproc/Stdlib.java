@@ -3,10 +3,13 @@ package net.sourceforge.plantuml.preproc;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -76,7 +79,8 @@ public class Stdlib {
 		for (String s : infoString.split("\n"))
 			if (s.contains("=")) {
 				final String data[] = s.split("=");
-				this.info.put(data[0], data[1]);
+				if (data.length == 2)
+					this.info.put(data[0], data[1]);
 			}
 	}
 
@@ -127,7 +131,7 @@ public class Stdlib {
 		for (String s : infoString.split("\n"))
 			if (s.contains("=")) {
 				final String data[] = s.split("=");
-				if (data[0].equals("LINK"))
+				if (data[0].equalsIgnoreCase("link"))
 					return data[1];
 			}
 		return null;
@@ -141,7 +145,7 @@ public class Stdlib {
 		return (read1byte(is) << 8) + read1byte(is);
 	}
 
-	private String loadResource(String file) throws IOException {
+	/*private*/ public String loadResource(String file) throws IOException {
 		final SoftReference<String> cached = cache.get(file.toLowerCase());
 		if (cached != null) {
 			final String cachedResult = cached.get();
@@ -317,19 +321,22 @@ public class Stdlib {
 		return new BrotliInputStream(raw);
 	}
 
-	private static InputStream getInternalInputStream(String fullname, String extension) {
-		final String res = "/stdlib/" + fullname + extension;
-		return Stdlib.class.getResourceAsStream(res);
+	private static InputStream getInternalInputStream(String fullname, String extension) throws FileNotFoundException {
+		final String path = "stdlib/" + fullname + extension;
+		InputStream result = Stdlib.class.getResourceAsStream("/" + path);
+		if (result == null)
+			result = new BufferedInputStream(new FileInputStream(path));
+		return result;
 	}
 
 	public static void extractStdLib() throws IOException {
-		for (String name : getAll()) {
+		for (String name : getAllFolderNames()) {
 			final Stdlib folder = Stdlib.retrieve(name);
 			folder.extractMeFull();
 		}
 	}
 
-	private static Collection<String> getAll() throws IOException {
+	public static Collection<String> getAllFolderNames() throws IOException {
 		final Set<String> result = new TreeSet<>();
 		final InputStream home = getInternalInputStream("home", ".repx");
 		if (home == null)
@@ -386,6 +393,32 @@ public class Stdlib {
 		}
 	}
 
+	public Collection<String> getAllFilenamesWithSprites() throws IOException {
+		final Set<String> result = new TreeSet<>();
+		final DataInputStream dataStream = getDataStream();
+		if (dataStream == null)
+			return result;
+
+		dataStream.readUTF();
+		try {
+			while (true) {
+				final String filename = dataStream.readUTF();
+				if (filename.equals(SEPARATOR))
+					return result;
+
+				while (true) {
+					final String s = dataStream.readUTF();
+					if (s.equals(SEPARATOR))
+						break;
+					if (isSpriteLine(s))
+						result.add(filename);
+				}
+			}
+		} finally {
+			dataStream.close();
+		}
+	}
+
 	public List<String> extractAllSprites() throws IOException {
 		final List<String> result = new ArrayList<>();
 		final DataInputStream dataStream = getDataStream();
@@ -428,7 +461,7 @@ public class Stdlib {
 
 	public static void addInfoVersion(List<String> strings, boolean details) {
 		try {
-			for (String name : getAll()) {
+			for (String name : getAllFolderNames()) {
 				final Stdlib folder = Stdlib.retrieve(name);
 				if (details) {
 					strings.add("<b>" + name);
@@ -445,12 +478,23 @@ public class Stdlib {
 		}
 	}
 
-	private String getVersion() {
-		return info.get("VERSION");
+	public String getVersion() {
+		String result = info.get("VERSION");
+		if (result == null)
+			result = info.get("version");
+		return result;
 	}
 
-	private String getSource() {
-		return info.get("SOURCE");
+	public String getSource() {
+		String result = info.get("SOURCE");
+		if (result == null)
+			result = info.get("source");
+		return result;
+	}
+
+	public Map<String, String> getMetadata() {
+		return Collections.unmodifiableMap(info);
+
 	}
 
 	public static void printStdLib() {
