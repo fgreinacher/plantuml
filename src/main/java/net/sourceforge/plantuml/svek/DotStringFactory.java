@@ -49,7 +49,6 @@ import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.dot.DotSplines;
 import net.sourceforge.plantuml.dot.Graphviz;
 import net.sourceforge.plantuml.dot.GraphvizRuntimeEnvironment;
-import net.sourceforge.plantuml.dot.GraphvizUtils;
 import net.sourceforge.plantuml.dot.GraphvizVersion;
 import net.sourceforge.plantuml.dot.ProcessState;
 import net.sourceforge.plantuml.klimt.font.StringBounder;
@@ -331,11 +330,12 @@ public final class DotStringFactory implements Moveable {
 		return graphviz.getDotExe();
 	}
 
+	private static final Pattern pGraph = Pattern.compile("(?m)\\<svg\\s+width=\"(\\d+)pt\"\\s+height=\"(\\d+)pt\"");
+
 	public void solve(final String svg) throws IOException, InterruptedException {
 		if (svg.length() == 0)
 			throw new EmptySvgException();
 
-		final Pattern pGraph = Pattern.compile("(?m)\\<svg\\s+width=\"(\\d+)pt\"\\s+height=\"(\\d+)pt\"");
 		final Matcher mGraph = pGraph.matcher(svg);
 		if (mGraph.find() == false)
 			throw new IllegalStateException();
