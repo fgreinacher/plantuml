@@ -119,10 +119,11 @@ public class Stereotype implements CharSequence {
 		return "<<O-O>>".equalsIgnoreCase(decoration.label);
 	}
 
+	private final static Pattern p = Pattern.compile("\\<\\<\\s?((?:\\<&\\w+\\>|[^<>])+?)\\s?\\>\\>");
+
 	public List<String> getMultipleLabels() {
 		final List<String> result = new ArrayList<>();
 
-		final Pattern p = Pattern.compile("\\<\\<\\s?((?:\\<&\\w+\\>|[^<>])+?)\\s?\\>\\>");
 		final Matcher m = p.matcher(decoration.label);
 		while (m.find())
 			result.add(m.group(1));
@@ -183,7 +184,7 @@ public class Stereotype implements CharSequence {
 	public List<Style> getStyles(StyleBuilder builder) {
 		final List<Style> result = new ArrayList<>();
 		for (String s : getStyleNames()) {
-			final Style style = builder.createStyle(s);
+			final Style style = builder.createStyleStereotype(s);
 			assert (style != null);
 			result.add(style);
 		}

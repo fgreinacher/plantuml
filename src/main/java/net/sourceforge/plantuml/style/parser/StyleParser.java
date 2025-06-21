@@ -66,7 +66,7 @@ public class StyleParser {
 		final CssVariables variables = new CssVariables();
 		StyleScheme scheme = StyleScheme.REGULAR;
 
-		Context context = new Context();
+		Context context = Context.empty();
 
 //		System.err.println("tokens=" + tokens.size());
 //		if (tokens.size() < 100)
@@ -129,7 +129,7 @@ public class StyleParser {
 			} else if (token.getType() == StyleTokenType.CLOSE_BRACKET) {
 				for (Style st : context.toStyles())
 					result.add(st);
-				if (context.size() > 0)
+				if (context.isEmpty() == false)
 					context = context.pop();
 
 			} else if (token.getType() == StyleTokenType.AROBASE_MEDIA) {

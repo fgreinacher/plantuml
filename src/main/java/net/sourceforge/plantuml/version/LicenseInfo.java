@@ -46,7 +46,6 @@ import java.util.TreeSet;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.log.Logme;
 import net.sourceforge.plantuml.security.SFile;
 import net.sourceforge.plantuml.security.SImageIO;
@@ -131,7 +130,7 @@ public class LicenseInfo {
 
 				}
 			} catch (IOException e) {
-				Log.info("Error " + e);
+				Log.info(() -> "Error " + e);
 				// Logme.error(e);
 			}
 		}
@@ -145,7 +144,7 @@ public class LicenseInfo {
 				return PLSSignature.retrieveNamed(sig, key, true);
 			} catch (Exception e) {
 				// Logme.error(e);
-				Log.info("Error retrieving license info" + e);
+				Log.info(() -> "Error retrieving license info" + e);
 			}
 		}
 		return LicenseInfo.NONE;
@@ -233,7 +232,7 @@ public class LicenseInfo {
 			final String s = br.readLine();
 			final LicenseInfo result = retrieveNamed(s);
 			if (result != null)
-				Log.info("Reading license from " + f.getAbsolutePath());
+				Log.info(() -> "Reading license from " + f.getAbsolutePath());
 
 			return result;
 		} finally {

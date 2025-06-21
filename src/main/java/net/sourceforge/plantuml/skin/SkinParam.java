@@ -84,7 +84,6 @@ import net.sourceforge.plantuml.log.Logme;
 import net.sourceforge.plantuml.preproc.ConfigurationStore;
 import net.sourceforge.plantuml.preproc.OptionKey;
 import net.sourceforge.plantuml.regex.Matcher2;
-import net.sourceforge.plantuml.regex.MyPattern;
 import net.sourceforge.plantuml.regex.Pattern2;
 import net.sourceforge.plantuml.stereo.Stereotype;
 import net.sourceforge.plantuml.style.FromSkinparamToStyle;
@@ -136,8 +135,8 @@ public class SkinParam implements ISkinParam {
 	}
 
 	@Override
-	public void muteStyle(Style modifiedStyle) {
-		styleBuilder = getCurrentStyleBuilder().muteStyle(modifiedStyle);
+	public void muteStyle(Collection<Style> modifiedStyles) {
+		styleBuilder = getCurrentStyleBuilder().muteStyle(modifiedStyles);
 	}
 
 	@Override
@@ -163,7 +162,7 @@ public class SkinParam implements ISkinParam {
 	}
 
 	private static final String stereoPatternString = "\\<\\<(.*?)\\>\\>";
-	private static final Pattern2 stereoPattern = MyPattern.cmpile(stereoPatternString);
+	private static final Pattern2 stereoPattern = Pattern2.cmpile(stereoPatternString);
 
 	private final Map<String, String> params = new HashMap<String, String>();
 	private final Map<String, String> paramsPendingForStyleMigration = new LinkedHashMap<String, String>();
@@ -193,16 +192,14 @@ public class SkinParam implements ISkinParam {
 			applyPendingStyleMigration();
 			final FromSkinparamToStyle convertor = new FromSkinparamToStyle(key2);
 			convertor.convertNow(value, getCurrentStyleBuilder());
-			for (Style style : convertor.getStyles())
-				muteStyle(style);
+			muteStyle(convertor.getStyles());
 		}
 		if ("style".equalsIgnoreCase(key) && "strictuml".equalsIgnoreCase(value)) {
 			final InputStream internalIs = StyleLoader.class.getResourceAsStream("/skin/strictuml.skin");
 			final StyleBuilder styleBuilder = this.getCurrentStyleBuilder();
 			try {
 				final BlocLines lines = BlocLines.load(internalIs, null);
-				for (Style modifiedStyle : StyleParser.parse(lines, styleBuilder))
-					this.muteStyle(modifiedStyle);
+				this.muteStyle(StyleParser.parse(lines, styleBuilder));
 
 			} catch (StyleParsingException e) {
 				Logme.error(e);
@@ -216,8 +213,7 @@ public class SkinParam implements ISkinParam {
 		for (Entry<String, String> ent : paramsPendingForStyleMigration.entrySet()) {
 			final FromSkinparamToStyle convertor = new FromSkinparamToStyle(ent.getKey());
 			convertor.convertNow(ent.getValue(), getCurrentStyleBuilder());
-			for (Style style : convertor.getStyles())
-				muteStyle(style);
+			muteStyle(convertor.getStyles());
 		}
 		paramsPendingForStyleMigration.clear();
 	}

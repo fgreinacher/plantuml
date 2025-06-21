@@ -62,19 +62,21 @@ public class CommandGrouping extends SingleLineCommand2<SequenceDiagram> {
 
 	static IRegex getRegexConcat() {
 		return RegexConcat.build(CommandGrouping.class.getName(), RegexLeaf.start(), //
-				new RegexLeaf("PARALLEL", "(&[%s]*)?"), //
-				new RegexLeaf("TYPE", "(opt|alt|loop|par|par2|break|critical|else|end|also|group)"), //
-				new RegexLeaf("COLORS", "((?<!else)(?<!also)(?<!end)#\\w+)?(?:[%s]+(#\\w+))?"), //
+				new RegexLeaf(1, "PARALLEL", "(&[%s]*)?"), //
+				new RegexLeaf(1, "TYPE", "(opt|alt|loop|par|par2|break|critical|else|end|also|group)"), //
+				new RegexLeaf(2, "COLORS", "((?<!else)(?<!also)(?<!end)#\\w+)?(?:[%s]+(#\\w+))?"), //
 				new RegexOptional(//
 						new RegexConcat( //
 								RegexLeaf.spaceOneOrMore(), //
-								new RegexLeaf("COMMENT", "(.*?)") //
+								new RegexLeaf(1, "COMMENT", "(.*?)") //
 						)), RegexLeaf.end());
 	}
 
+	static private final Pattern p = Pattern.compile("^(.*\\[\\[.*\\]\\].*?|.*?)\\[(.*)\\]$");
+
 	@Override
-	protected CommandExecutionResult executeArg(SequenceDiagram diagram, LineLocation location, RegexResult arg, ParserPass currentPass)
-			throws NoSuchColorException {
+	protected CommandExecutionResult executeArg(SequenceDiagram diagram, LineLocation location, RegexResult arg,
+			ParserPass currentPass) throws NoSuchColorException {
 		String type = StringUtils.goLowerCase(arg.get("TYPE", 0));
 		final String s = arg.get("COLORS", 0);
 		final HColorSet colorSet = diagram.getSkinParam().getIHtmlColorSet();
@@ -93,7 +95,6 @@ public class CommandGrouping extends SingleLineCommand2<SequenceDiagram> {
 			if (StringUtils.isEmpty(comment)) {
 				comment = "group";
 			} else {
-				final Pattern p = Pattern.compile("^(.*\\[\\[.*\\]\\].*?|.*?)\\[(.*)\\]$");
 				final Matcher m = p.matcher(comment);
 				if (m.find()) {
 					type = m.group(1);
