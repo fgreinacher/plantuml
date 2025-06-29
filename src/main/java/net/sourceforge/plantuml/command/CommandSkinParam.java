@@ -54,11 +54,11 @@ public class CommandSkinParam extends SingleLineCommand2<TitledDiagram> {
 
 	static IRegex getRegexConcat() {
 		return RegexConcat.build(CommandSkinParam.class.getName(), RegexLeaf.start(), //
-				new RegexLeaf("TYPE", "(skinparam|skinparamlocked)"), //
+				new RegexLeaf(1, "TYPE", "(skinparam|skinparamlocked)"), //
 				RegexLeaf.spaceOneOrMore(), //
-				new RegexLeaf("NAME", "([\\w.]*(?:\\<\\<[^<>]*\\>\\>)?[\\w.]*)"), //
+				new RegexLeaf(1, "NAME", "([\\w.]*(?:\\<\\<[^<>]*\\>\\>)?[\\w.]*)"), //
 				RegexLeaf.spaceOneOrMore(), //
-				new RegexLeaf("VALUE", "([^{}]*)"), RegexLeaf.end()); //
+				new RegexLeaf(1, "VALUE", "([^{}]*)"), RegexLeaf.end()); //
 	}
 
 	@Override
@@ -70,6 +70,7 @@ public class CommandSkinParam extends SingleLineCommand2<TitledDiagram> {
 				diagram.addWarning(new Warning("Please use '!option handwritten true' to enable handwritten "));
 
 			diagram.setParam(name, arg.get("VALUE", 0));
+			diagram.setSkinParamUsed(true);
 
 			return CommandExecutionResult.ok();
 		} catch (NoStyleAvailableException e) {

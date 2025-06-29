@@ -35,6 +35,9 @@
  */
 package net.sourceforge.plantuml.style;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum SName {
 	action, //
 	activity, //
@@ -101,7 +104,7 @@ public enum SName {
 	highlight, //
 	hnote, //
 	interface_, //
-	json, // 
+	json, //
 	jsonDiagram, //
 	gitDiagram, //
 	label, //
@@ -157,7 +160,7 @@ public enum SName {
 	usecase, //
 	verticalSeparator, //
 	year, //
-	
+
 	visibilityIcon, //
 	private_, //
 	protected_, //
@@ -175,11 +178,23 @@ public enum SName {
 	spotAbstractClass, //
 	spotMetaClass, //
 	spotStereotype, //
+	spotDataClass, //
+	spotRecord, //
 
 	wbsDiagram, //
 	yamlDiagram; //
 
-	public static String depth(int level) {
-		return "depth(" + level + ")";
+	private static final Map<String, SName> ALL = new HashMap<>();
+
+	static {
+		for (SName sname : SName.values()) {
+			final String s = sname.name().replace("_", "").toLowerCase();
+			ALL.put(s, sname);
+		}
 	}
+
+	public static SName retrieve(String s) {
+		return ALL.get(s.toLowerCase());
+	}
+
 }

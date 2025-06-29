@@ -35,7 +35,6 @@
  */
 package net.sourceforge.plantuml.skin.rose;
 
-import net.sourceforge.plantuml.klimt.UStroke;
 import net.sourceforge.plantuml.klimt.UTranslate;
 import net.sourceforge.plantuml.klimt.color.HColor;
 import net.sourceforge.plantuml.klimt.drawing.UGraphic;
@@ -53,14 +52,14 @@ public class ComponentRoseDestroy extends AbstractComponent {
 
 	public ComponentRoseDestroy(Style style, ISkinParam skinParam) {
 		super(style, skinParam);
-		this.foregroundColor = style.value(PName.LineColor).asColor(getIHtmlColorSet());
+		this.foregroundColor = getColorLine();
 	}
 
 	private final int crossSize = 9;
 
 	@Override
 	protected void drawInternalU(UGraphic ug, Area area) {
-		ug = ug.apply(UStroke.withThickness(2)).apply(foregroundColor);
+		ug = ug.apply(getStroke()).apply(foregroundColor);
 
 		ug.draw(new ULine(2 * crossSize, 2 * crossSize));
 		ug.apply(UTranslate.dy(2 * crossSize)).draw(new ULine(2 * crossSize, -2 * crossSize));

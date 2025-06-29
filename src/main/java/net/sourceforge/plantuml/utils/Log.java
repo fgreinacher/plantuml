@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.ProgressBar;
@@ -93,14 +94,14 @@ public abstract class Log {
 	}
 	// ::done
 
-	public synchronized static void debug(String s) {
+	public synchronized static void debug(Supplier<String> msgSupplier) {
 	}
 
-	public synchronized static void info(String s) {
+	public synchronized static void info(Supplier<String> msgSupplier) {
 		// ::comment when __CORE__ or __HAXE__
 		if (OptionFlags.getInstance().isVerbose()) {
 			ProgressBar.clear();
-			System.err.println(format(s));
+			System.err.println(format(msgSupplier.get()));
 		}
 		// ::done
 	}
@@ -122,15 +123,19 @@ public abstract class Log {
 		// perflogInternal(line);
 	}
 
+	public static void deletePerfLogFile() {
+		final File file = new File(PERFLOG_FILENAME);
+		if (file.exists()) {
+			if (!file.delete()) {
+				error("Cannot del " + PERFLOG_FILENAME);
+			}
+		}
+	}
+
 	private synchronized static void perflogInternal(String line) {
 		try {
 			if (firstCall) {
-				File file = new File(PERFLOG_FILENAME);
-				if (file.exists()) {
-					if (!file.delete()) {
-						error("Cannot del " + PERFLOG_FILENAME);
-					}
-				}
+				deletePerfLogFile();
 				firstCall = false;
 			}
 			try (FileWriter fw = new FileWriter(PERFLOG_FILENAME, true);
@@ -142,4 +147,19 @@ public abstract class Log {
 			error("Cannot write in " + PERFLOG_FILENAME + " : " + e.getMessage());
 		}
 	}
+
+	public static synchronized void logStackTrace(String s) {
+		if (firstCall) {
+			deletePerfLogFile();
+			firstCall = false;
+		}
+		try (FileWriter fw = new FileWriter(PERFLOG_FILENAME, true); PrintWriter pw = new PrintWriter(fw)) {
+			final Exception e = new Exception("StackTrace " + s);
+			e.fillInStackTrace();
+			e.printStackTrace(pw);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
 }

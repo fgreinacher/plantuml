@@ -42,7 +42,6 @@ import net.sourceforge.plantuml.klimt.geom.XDimension2D;
 import net.sourceforge.plantuml.klimt.shape.ULine;
 import net.sourceforge.plantuml.skin.AbstractComponent;
 import net.sourceforge.plantuml.skin.Area;
-import net.sourceforge.plantuml.skin.ArrowConfiguration;
 import net.sourceforge.plantuml.style.ISkinParam;
 import net.sourceforge.plantuml.style.PName;
 import net.sourceforge.plantuml.style.Style;
@@ -53,13 +52,13 @@ public class ComponentRoseNewpage extends AbstractComponent {
 
 	public ComponentRoseNewpage(Style style, ISkinParam skinParam) {
 		super(style, skinParam);
-		this.foregroundColor = style.value(PName.LineColor).asColor(getIHtmlColorSet());
+		this.foregroundColor = getColorLine();
 	}
 
 	@Override
 	protected void drawInternalU(UGraphic ug, Area area) {
 		final XDimension2D dimensionToUse = area.getDimensionToUse();
-		ug = ArrowConfiguration.stroke(ug, 2, 2, 1).apply(foregroundColor);
+		ug = ug.apply(getStroke()).apply(foregroundColor);
 		ug.draw(ULine.hline(dimensionToUse.getWidth()));
 	}
 

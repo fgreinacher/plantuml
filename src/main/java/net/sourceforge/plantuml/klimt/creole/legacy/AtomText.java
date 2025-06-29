@@ -99,8 +99,8 @@ public final class AtomText extends AbstractAtom implements Atom {
 	@JawsStrange
 	public XDimension2D calculateDimension(StringBounder stringBounder) {
 		final XDimension2D rect = stringBounder.calculateDimension(fontConfiguration.getFont(), text);
-		Log.debug("g2d=" + rect);
-		Log.debug("Size for " + text + " is " + rect);
+		Log.debug(() -> "g2d=" + rect);
+		Log.debug(() -> "Size for " + text + " is " + rect);
 		double h = rect.getHeight();
 		if (h < 10)
 			h = 10;
@@ -215,31 +215,31 @@ public final class AtomText extends AbstractAtom implements Atom {
 			}
 			final NeutronType pendingType = Neutron.getNeutronTypeFromChar(pending.charAt(0));
 			final NeutronType currentType = Neutron.getNeutronTypeFromChar(ch);
-			if (pendingType != currentType) {
+			if (pendingType != currentType || pendingType == NeutronType.CJK_IDEOGRAPH) {
 				addPending(result, pending.toString());
 				pending.setLength(0);
 			}
 			pending.append(ch);
 			// if (Neutron.isSentenceBoundary(ch) || Neutron.isChineseSentenceBoundary(ch))
-			if (Neutron.isChineseSentenceBoundary(ch)) {
-				addPending(result, pending.toString());
-				pending.setLength(0);
-				result.add(Neutron.zwspSeparator());
-			}
+//			if (Neutron.isChineseSentenceBoundary(ch)) {
+//				addPending(result, pending.toString());
+//				pending.setLength(0);
+//				result.add(Neutron.zwspSeparator());
+//			}
 
 		}
-		if (pending.length() > 0) {
+		if (pending.length() > 0)
 			addPending(result, pending.toString());
-		}
+
 		return result;
 	}
 
 	private void addPending(List<Neutron> result, String pending) {
 		final Neutron tmp = Neutron.create(withText(pending));
-		if (tmp.getType() == NeutronType.SPACE)
+		if (tmp.getType() == NeutronType.WHITESPACE || tmp.getType() == NeutronType.CJK_IDEOGRAPH)
 			result.add(Neutron.zwspSeparator());
 		result.add(tmp);
-		if (tmp.getType() == NeutronType.SPACE)
+		if (tmp.getType() == NeutronType.WHITESPACE || tmp.getType() == NeutronType.CJK_IDEOGRAPH)
 			result.add(Neutron.zwspSeparator());
 	}
 

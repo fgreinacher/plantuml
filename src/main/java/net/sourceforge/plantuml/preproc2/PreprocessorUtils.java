@@ -69,8 +69,9 @@ import net.sourceforge.plantuml.utils.Log;
 
 public class PreprocessorUtils {
 
+	private static final Pattern p = Pattern.compile("%(\\w+)%");
+
 	public static String withEnvironmentVariable(String s) {
-		final Pattern p = Pattern.compile("%(\\w+)%");
 
 		final Matcher m = p.matcher(s);
 		final StringBuffer sb = new StringBuffer(); // Can't be switched to StringBuilder in order to support Java 8
@@ -116,7 +117,9 @@ public class PreprocessorUtils {
 	public static ReadLine getReaderNonstandardInclude(StringLocated s, String filename) {
 		if (filename.endsWith(".puml") == false)
 			filename = filename + ".puml";
-		Log.info("Loading non standard " + filename);
+
+		final String filename2 = filename;
+		Log.info(() -> "Loading non standard " + filename2);
 		final String res = "/stdlib/" + filename;
 		InputStream is = Stdlib.class.getResourceAsStream(res);
 
@@ -129,7 +132,7 @@ public class PreprocessorUtils {
 	// ::done
 
 	public static ReadLine getReaderStdlibInclude(StringLocated s, String filename) throws IOException {
-		Log.info("Loading sdlib " + filename);
+		Log.info(() -> "Loading sdlib " + filename);
 		InputStream is = getStdlibInputStream(filename);
 		if (is == null)
 			return null;
